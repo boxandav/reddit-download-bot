@@ -30,10 +30,13 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
             if has_gallery(submission):
                 print(f"Processing gallery {submission.id}")
                 process_gallery(submission, subreddit_name)
-            if not has_gallery(submission):
+            else:
                 if not submission.is_self:
                     print(f"Processing media {submission.id}")
                     process_media(submission, subreddit_name)
+                else:
+                    print(f"Processing self {submission.id}")
+                    process_self(submission, subreddit_name)
 
             add_to_posts(submission, subreddit_name)
         except Exception as e:
@@ -61,6 +64,14 @@ def process_media(submission, subreddit_name: str):
     output_path = f"subreddits/{subreddit_name}/{output_name}"
 
     download_media(submission.url, output_path)
+
+
+def process_self(submission, subreddit_name: str):
+    output_name = f"{submission.id}.md"
+    output_path = f"subreddits/{subreddit_name}/{output_name}"
+
+    with open(output_path, "w") as fi:
+        fi.write(submission.selftext)
 
 
 def add_to_posts(submission, subreddit_name: str):
