@@ -10,6 +10,7 @@ from utils import \
 config = read_config()
 subreddit_dir = config["locations"]["subreddits_dir"]
 errors_loc = config["locations"]["errors"]
+save_posts = config["save_posts"]
 
 
 def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
@@ -33,18 +34,20 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
             continue
 
         try:
-            if has_gallery(submission):
+            if has_gallery(submission) and save_posts["gallery"]:
                 print(f"Processing gallery {submission.id}")
                 process_gallery(submission, subreddit_name)
+                add_to_posts(submission, subreddit_name)
             else:
-                if not submission.is_self:
+                if not submission.is_self and save_posts["media"]:
                     print(f"Processing media {submission.id}")
                     process_media(submission, subreddit_name)
-                else:
+                    add_to_posts(submission, subreddit_name)
+                if submission.is_self and save_posts["self"]:
                     print(f"Processing self {submission.id}")
                     process_self(submission, subreddit_name)
-
-            add_to_posts(submission, subreddit_name)
+                    add_to_posts(submission, subreddit_name)
+                    
         except Exception as e:
             add_error(submission, e)
 
