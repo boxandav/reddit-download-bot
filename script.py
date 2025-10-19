@@ -3,17 +3,18 @@ import os
 from praw import Reddit
 
 from processing import scan_subreddit
-from utils import check_existing_files, init_data
+from utils import check_existing_files, read_config
 
 
 def main():
     reddit = Reddit("gudin") # put configuration from praw.ini here
 
-    if not os.path.isfile("subreddits.txt"):
-        print("Missing subreddits.txt. The script will terminate.")
+    if not os.path.isfile("config.json"):
+        print("Missing config.json. The script will terminate.")
         return
     
-    subreddits = init_data("subreddits.txt")
+    config = read_config()
+    subreddits = config["subreddits"]
 
     check_existing_files()
 

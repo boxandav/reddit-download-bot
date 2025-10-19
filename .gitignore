@@ -4,3 +4,4 @@ subreddits.txt
 *.csv
 *.gif
 subreddits/*
+config.json

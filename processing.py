@@ -3,13 +3,19 @@ import os
 
 from praw import Reddit
 
-from utils import download_media, get_csv_column, has_gallery, now_timestamp
+from utils import \
+    download_media, get_csv_column, has_gallery, now_timestamp, read_config
+
+
+config = read_config()
+subreddit_dir = config["locations"]["subreddits_dir"]
+errors_loc = config["locations"]["errors"]
 
 
 def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
-    subreddit_path = f"subreddits/{subreddit_name}"
+    subreddit_dir = config["locations"]["subreddits_dir"]
+    subreddit_path = f"{subreddit_dir}/{subreddit_name}"
     posts_path = f"{subreddit_path}/posts_{subreddit_name}.csv"
-    errors_path = "errors.csv"
 
     if not os.path.isdir(subreddit_path): # check if dir exists
         os.mkdir(subreddit_path)
@@ -18,7 +24,7 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
         with open(posts_path, "w") as fi:
             fi.write("id;user;title;timestamp\n")
 
-    existing_ids = get_csv_column(posts_path, "id") + get_csv_column(errors_path, "id")
+    existing_ids = get_csv_column(posts_path, "id") + get_csv_column(errors_loc, "id")
 
     subreddit = reddit.subreddit(subreddit_name)
     for submission in subreddit.new(limit=limit):
@@ -53,7 +59,7 @@ def process_gallery(submission, subreddit_name: str):
 
         extension = media_url.split(".")[-1].split("?")[0]
         output_name = f"{submission.id}_{idx}.{extension}"
-        output_path = f"subreddits/{subreddit_name}/{output_name}"
+        output_path = f"{subreddit_dir}/{subreddit_name}/{output_name}"
 
         download_media(media_url, output_path)
 
@@ -61,21 +67,21 @@ def process_gallery(submission, subreddit_name: str):
 def process_media(submission, subreddit_name: str):
     extension = submission.url.split(".")[-1]
     output_name = f"{submission.id}.{extension}"
-    output_path = f"subreddits/{subreddit_name}/{output_name}"
+    output_path = f"{subreddit_dir}/{subreddit_name}/{output_name}"
 
     download_media(submission.url, output_path)
 
 
 def process_self(submission, subreddit_name: str):
     output_name = f"{submission.id}.md"
-    output_path = f"subreddits/{subreddit_name}/{output_name}"
+    output_path = f"{subreddit_dir}/{subreddit_name}/{output_name}"
 
     with open(output_path, "w") as fi:
         fi.write(submission.selftext)
 
 
 def add_to_posts(submission, subreddit_name: str):
-    posts_path = f"subreddits/{subreddit_name}/posts_{subreddit_name}.csv"
+    posts_path = f"{subreddit_dir}/{subreddit_name}/posts_{subreddit_name}.csv"
     with open(posts_path, "a", newline="") as csvfile:
         row = [
             submission.id, submission.author.name, submission.title, now_timestamp()
@@ -86,7 +92,7 @@ def add_to_posts(submission, subreddit_name: str):
 
 
 def add_error(submission, description: str):
-    with open("errors.csv", "a", newline="") as csvfile:
+    with open(errors_loc, "a", newline="") as csvfile:
         row = [
             submission.id, now_timestamp(), description
         ]

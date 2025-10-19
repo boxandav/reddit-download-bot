@@ -1,31 +1,44 @@
 import csv
+import json
 import os
 from datetime import datetime
 
 import requests
 
 
-def init_data(file_path: str) -> list:
-    with open(file_path, "r") as fi:
-        result = fi.read().rstrip().split("\n")
-    return result
+def read_config() -> dict:
+    try:
+        with open("config.json", "r") as fi:
+            return json.load(fi)
+        
+    except FileNotFoundError:
+        print("Missing config.json.")
+        return {}
+    except json.JSONDecodeError:
+        print("Content of config.json is invalid.")
+        return {}
+    except Exception:
+        print("Error while opening config.json.")
+        return {}
 
 
 def check_existing_files():
-    dirs = ["subreddits"]
-    files = ["errors.csv"]
+    config = read_config()
+    locations = config["locations"].values()
 
-    for dir in dirs:
-        if not os.path.isdir(dir):
-            os.mkdir(dir)
+    for location in locations:
+        is_file = "." in location # file or directory
 
-    for fi in files:
-        if not os.path.isfile(fi):
-            os.mknod(fi)
+        if not is_file and not os.path.isdir(location):
+            os.mkdir(location)
         
-        if fi == "errors.csv":
-            with open("errors.csv", "w") as fi:
-                fi.write("id;timestamp;description\n")
+        if is_file:
+            if not os.path.isfile(location):
+                os.mknod(location)
+            
+            if location == config["locations"]["errors"]:
+                with open(config["locations"]["errors"], "w") as fi:
+                    fi.write("id;timestamp;description\n")
 
 
 def has_gallery(subreddit) -> bool:

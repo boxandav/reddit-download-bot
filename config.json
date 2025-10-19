@@ -1,0 +1,12 @@
+{
+    "subreddits": ["czech"],
+    "save_posts": {
+        "text": true,
+        "image": true,
+        "video": true
+    },
+    "locations": {
+        "subreddits_dir": "subreddits",
+        "errors": "errors.csv"
+    }
+}
