@@ -7,13 +7,14 @@ from utils import check_existing_files, read_config
 
 
 def main():
-    reddit = Reddit("gudin") # put configuration from praw.ini here
+    config = read_config()
+
+    reddit = Reddit(config["bot_name"]) # put configuration from praw.ini here
 
     if not os.path.isfile("config.json"):
         print("Missing config.json. The script will terminate.")
         return
     
-    config = read_config()
     subreddits = config["subreddits"]
 
     check_existing_files()
