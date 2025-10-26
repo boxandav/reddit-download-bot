@@ -6,6 +6,7 @@ This is a bot script that downloads posts (text, media, galleries) from a list o
 
 This script is still in development, I am planning to add more useful features in the future. For now the features are these:
 
+- Scan posts of a subreddit or specific redditor
 - Downloads various kinds of posts (selftext, images, videos, galleries)
 - Saves downloaded posts into a directory
 	- Selftext posts are saved in **Markdown** format, whereas all media posts are saved in their respective format (gif, png...)
@@ -27,6 +28,8 @@ A key part of this project is the **config file** which you need to create manua
 ```json
 {
 	"bot_name": "download_bot",
+    "post_limit": 10,
+    "redditors": [],
 	"subreddits": [],
 	"save_posts": {
 		"self": true,
@@ -35,6 +38,7 @@ A key part of this project is the **config file** which you need to create manua
 	},
 	"locations": {
 		"subreddits_dir": "subreddits",
+        "redditors_dir": "redditors",
 		"errors": "errors.csv"
 	}
 }
@@ -104,6 +108,6 @@ If you are using `pipenv`, first write `pipenv run` before the call.
 
 ### Output location
 
-All posts are saved in the directory set in `subreddits_dir` inside the `locations` configuration. Each subreddit has its own directory with its posts, as well as the download history which is stored in `posts_{subreddit}.csv`.
+All posts are saved in the directory set in `subreddits_dir` and `redditors_dir` inside the `locations` configuration. Each subreddit/redditor has its own directory with its posts, as well as the download history which is stored in `posts_{subreddit/redditors}.csv`.
 
 In case the script runs into any errors, you can see them in `errors.csv` in the root directory.

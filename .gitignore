@@ -1,7 +1,7 @@
 praw.ini
 __pycache__
-subreddits.txt
 *.csv
 *.gif
 subreddits/*
+redditors/*
 config.json
