@@ -16,7 +16,7 @@ errors_loc = config["locations"]["errors"]
 save_posts = config["save_posts"]
 
 
-def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
+def scan_subreddit(reddit: Reddit, subreddit_name: str, mode: str, limit: int = 10):
     subreddit_path = f"{dir_locations['subreddit']}/{subreddit_name}"
     posts_path = f"{subreddit_path}/posts_{subreddit_name}.csv"
 
@@ -25,7 +25,12 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
     existing_ids = get_csv_column(posts_path, "id") + get_csv_column(errors_loc, "id")
 
     subreddit = reddit.subreddit(subreddit_name)
-    for submission in subreddit.new(limit=limit):
+    mode_func = {
+        "hot": subreddit.hot,
+        "new": subreddit.new
+    }[mode]
+
+    for submission in mode_func(limit=limit):
         if submission.id in existing_ids:
             print(f"Skipping {submission.id} of subreddit {subreddit_name}")
             continue
@@ -36,7 +41,7 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, limit: int = 10):
             add_error(submission, e)
 
 
-def scan_redditor(reddit: Reddit, redditor_name: str, limit: int = 10):
+def scan_redditor(reddit: Reddit, redditor_name: str, mode: str, limit: int = 10):
     redditor_path = f"{dir_locations['redditor']}/{redditor_name}"
     posts_path = f"{redditor_path}/posts_{redditor_name}.csv"
 
@@ -45,8 +50,12 @@ def scan_redditor(reddit: Reddit, redditor_name: str, limit: int = 10):
     existing_ids = get_csv_column(posts_path, "id") + get_csv_column(errors_loc, "id")
 
     redditor = reddit.redditor(redditor_name)
+    mode_func = {
+        "hot": redditor.submissions.hot,
+        "new": redditor.submissions.new
+    }[mode]
     
-    for submission in redditor.submissions.new(limit=limit):
+    for submission in mode_func(limit=limit):
         if submission.id in existing_ids:
             print(f"Skipping {submission.id} of redditor {redditor_name}")
             continue

@@ -21,12 +21,12 @@ def main():
 
     check_existing_files()
 
-    for subreddit_name in subreddits:
+    for subreddit_name, mode in subreddits.items():
         print(f"Scanning r/{subreddit_name}")
-        scan_subreddit(reddit, subreddit_name, post_limit)
-    for redditor_name in redditors:
+        scan_subreddit(reddit, subreddit_name, mode, post_limit)
+    for redditor_name, mode in redditors.items():
         print(f"Scanning u/{redditor_name}")
-        scan_redditor(reddit, redditor_name, post_limit)
+        scan_redditor(reddit, redditor_name, mode, post_limit)
 
 
 if __name__ == "__main__":
