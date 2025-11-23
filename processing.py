@@ -1,5 +1,7 @@
 import csv
+import json
 import os
+from datetime import datetime, timezone
 
 from praw import Reddit
 
@@ -81,6 +83,14 @@ def process_post(submission, subreddit_name: str, save_posts: dict, mode: str): 
             process_self(submission, subreddit_name, mode)
             add_to_posts(submission, subreddit_name, mode)
 
+    if config["save_comments"]:
+        comments_dir = f"{mode}s/{subreddit_name}/comments"
+        if not os.path.isdir(comments_dir):
+            os.mkdir(comments_dir)
+        
+        comments_name = f"{submission.id}.json"
+        save_comments(submission, f"{comments_dir}/{comments_name}")
+
 
 def process_gallery(submission, dest_name: str, mode: str):
     items = submission.gallery_data["items"]
@@ -141,3 +151,26 @@ def check_posts_dir(dir_path: str, posts_path: str):
 
         with open(posts_path, "w") as fi:
             fi.write("id;user;title;timestamp\n")
+
+
+def extract_comment_data(comment, depth=0):
+    created_at = datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
+    return {
+        "id": comment.id,
+        "author": str(comment.author),
+        "body": comment.body,
+        "score": comment.score,
+        "created_at": created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "depth": depth,
+        "replies": [
+            extract_comment_data(reply, depth + 1) for reply in comment.replies
+        ]
+    }
+
+
+def save_comments(submission, filename):
+    submission.comments.replace_more(limit=None)
+    comments_data = [extract_comment_data(comment) for comment in submission.comments.list()]
+    
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(comments_data, f, ensure_ascii=False, indent=4)
