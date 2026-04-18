@@ -14,6 +14,10 @@ dir_locations = {
     "subreddit": config["locations"]["subreddits_dir"],
     "redditor": config["locations"]["redditors_dir"]
 }
+ignored = {
+    "subreddits": config["ignore"]["subreddits"],
+    "redditors": config["ignore"]["redditors"]
+}
 errors_loc = config["locations"]["errors"]
 save_posts = config["save_posts"]
 
@@ -33,7 +37,7 @@ def scan_subreddit(reddit: Reddit, subreddit_name: str, mode: str, limit: int = 
     }[mode]
 
     for submission in mode_func(limit=limit):
-        if submission.id in existing_ids:
+        if submission.id in existing_ids or submission.author.name in ignored["redditors"]:
             print(f"Skipping {submission.id} of subreddit {subreddit_name}")
             continue
 
@@ -58,7 +62,7 @@ def scan_redditor(reddit: Reddit, redditor_name: str, mode: str, limit: int = 10
     }[mode]
     
     for submission in mode_func(limit=limit):
-        if submission.id in existing_ids:
+        if submission.id in existing_ids or submission.author.name in ignored["subreddits"]:
             print(f"Skipping {submission.id} of redditor {redditor_name}")
             continue
 
